@@ -15,11 +15,12 @@ function requireLogin() {
 function requireAdmin() {
     requireLogin();
     if ($_SESSION['role'] !== 'admin') {
-        die('Access denied.');
+        die('Access denied. Admin only.');
     }
 }
 
 function loginUser($id, $username, $role) {
+    session_regenerate_id(true);
     $_SESSION['user_id'] = $id;
     $_SESSION['username'] = $username;
     $_SESSION['role'] = $role;

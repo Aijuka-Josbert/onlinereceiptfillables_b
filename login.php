@@ -74,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: var(--input-bg);
             color: var(--chrome-text);
             font-size: 15px;
-            transition: border-color 0.2s;
         }
         .login-card input:focus {
             outline: none;

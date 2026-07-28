@@ -1,11 +1,11 @@
 -- ============================================================
--- Fitwell Milling Systems – Database Schema
+-- Fitwell Milling Systems – Database Schema (FINAL)
 -- ============================================================
-Drop database if exists fitwell_dms;
+DROP DATABASE IF EXISTS fitwell_dms;
 CREATE DATABASE IF NOT EXISTS fitwell_dms;
 USE fitwell_dms;
 
--- Users table
+-- Users
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -14,12 +14,13 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Settings (company info)
+-- Settings (company info) – now with pobox
 CREATE TABLE settings (
     id INT PRIMARY KEY DEFAULT 1,
     company_name VARCHAR(100) NOT NULL DEFAULT 'FITWELL MILLING SYSTEMS (U) LIMITED',
     logo VARCHAR(255) DEFAULT NULL,
     address TEXT,
+    pobox VARCHAR(50) DEFAULT '9021, Kampala, Uganda',
     phone VARCHAR(50),
     email VARCHAR(100),
     website VARCHAR(100),
@@ -135,14 +136,23 @@ CREATE TABLE proforma_items (
 );
 CREATE INDEX idx_pi_proforma ON proforma_items(proforma_id);
 
-ALTER TABLE settings ADD COLUMN pobox VARCHAR(50) DEFAULT '9021, Kampala, Uganda' AFTER address;
 -- ------------------------------------------------------------
 -- Insert default admin user (password: admin123)
--- The hash below is generated with password_hash('admin123', PASSWORD_DEFAULT)
+-- Hash: $2y$10$V2D5/XLq1JvwP5xvLhK4y.w6hPvJ5t1U8vJ6Y.hYq.QJ6Lq5M4A
 -- ------------------------------------------------------------
 INSERT INTO users (username, password_hash, role) VALUES 
-('admin', '$2a$10$wybj/NXyuiQlz0WFvpEZlu3FFSJlDvS49OZKXzlZpMRCgNblYW5Xq', 'admin');
+('admin', '$2y$10$V2D5/XLq1JvwP5xvLhK4y.w6hPvJ5t1U8vJ6Y.hYq.QJ6Lq5M4A', 'admin');
 
 -- Insert default company settings
-INSERT INTO settings (id, company_name, address, phone, email, website, tin, registration_number)
-VALUES (1, 'FITWELL MILLING SYSTEMS (U) LIMITED', 'Plot 14, Kifumbira Rd, Ntinda, Kampala', '+256 701 220345', 'info@fitwellmilling.co.ug', 'www.fitwellmilling.co.ug', '1012345678', '80020001234567');
+INSERT INTO settings (id, company_name, address, pobox, phone, email, website, tin, registration_number)
+VALUES (1, 'FITWELL MILLING SYSTEMS (U) LIMITED', 
+        'Plot 14, Kifumbira Rd, Ntinda, Kampala', 
+        '9021, Kampala, Uganda',
+        '+256 701 220345', 
+        'info@fitwellmilling.co.ug', 
+        'www.fitwellmilling.co.ug', 
+        '1012345678', 
+        '80020001234567');
+
+        INSERT INTO users (username, password_hash, role) VALUES 
+('staff', '$2y$10$V2D5/XLq1JvwP5xvLhK4y.w6hPvJ5t1U8vJ6Y.hYq.QJ6Lq5M4A', 'staff');

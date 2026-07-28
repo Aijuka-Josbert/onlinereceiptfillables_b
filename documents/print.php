@@ -6,53 +6,58 @@ requireLogin();
 
 $type = $_GET['type'] ?? '';
 $id = (int)($_GET['id'] ?? 0);
-if (!$type || !$id) die("Invalid request.");
+$error = '';
 
-// Fetch document and items
-$doc = null;
-$items = [];
-$customer = null;
-$company = getCompany($pdo);
+if (!$type || !$id) {
+    $error = 'Invalid document request.';
+} else {
+    $doc = null;
+    $items = [];
+    $customer = null;
+    $company = getCompany($pdo);
 
-if ($type === 'DN') {
-    $stmt = $pdo->prepare("SELECT * FROM delivery_notes WHERE id = ?");
-    $stmt->execute([$id]);
-    $doc = $stmt->fetch();
-    if ($doc) {
-        $stmt = $pdo->prepare("SELECT * FROM delivery_note_items WHERE delivery_note_id = ?");
+    if ($type === 'DN') {
+        $stmt = $pdo->prepare("SELECT * FROM delivery_notes WHERE id = ?");
         $stmt->execute([$id]);
-        $items = $stmt->fetchAll();
-        $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
-        $stmt->execute([$doc['customer_id']]);
-        $customer = $stmt->fetch();
-    }
-} elseif ($type === 'RC') {
-    $stmt = $pdo->prepare("SELECT * FROM receipts WHERE id = ?");
-    $stmt->execute([$id]);
-    $doc = $stmt->fetch();
-    if ($doc) {
-        $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
-        $stmt->execute([$doc['customer_id']]);
-        $customer = $stmt->fetch();
-    }
-} elseif ($type === 'PF') {
-    $stmt = $pdo->prepare("SELECT * FROM proforma_invoices WHERE id = ?");
-    $stmt->execute([$id]);
-    $doc = $stmt->fetch();
-    if ($doc) {
-        $stmt = $pdo->prepare("SELECT * FROM proforma_items WHERE proforma_id = ?");
+        $doc = $stmt->fetch();
+        if ($doc) {
+            $stmt = $pdo->prepare("SELECT * FROM delivery_note_items WHERE delivery_note_id = ?");
+            $stmt->execute([$id]);
+            $items = $stmt->fetchAll();
+            $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
+            $stmt->execute([$doc['customer_id']]);
+            $customer = $stmt->fetch();
+        }
+    } elseif ($type === 'RC') {
+        $stmt = $pdo->prepare("SELECT * FROM receipts WHERE id = ?");
         $stmt->execute([$id]);
-        $items = $stmt->fetchAll();
-        $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
-        $stmt->execute([$doc['customer_id']]);
-        $customer = $stmt->fetch();
+        $doc = $stmt->fetch();
+        if ($doc) {
+            $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
+            $stmt->execute([$doc['customer_id']]);
+            $customer = $stmt->fetch();
+        }
+    } elseif ($type === 'PF') {
+        $stmt = $pdo->prepare("SELECT * FROM proforma_invoices WHERE id = ?");
+        $stmt->execute([$id]);
+        $doc = $stmt->fetch();
+        if ($doc) {
+            $stmt = $pdo->prepare("SELECT * FROM proforma_items WHERE proforma_id = ?");
+            $stmt->execute([$id]);
+            $items = $stmt->fetchAll();
+            $stmt = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
+            $stmt->execute([$doc['customer_id']]);
+            $customer = $stmt->fetch();
+        }
+    }
+    if (!$doc) {
+        $error = 'Document not found. Please save the document first.';
     }
 }
-if (!$doc) die("Document not found.");
 
 // Generate PDF if requested
-if (isset($_GET['pdf'])) {
-    require_once '../vendor/autoload.php'; // Dompdf
+if (isset($_GET['pdf']) && !$error) {
+    require_once '../vendor/autoload.php'; // Dompdf – optional
     $dompdf = new Dompdf\Dompdf();
     $html = renderDocument($doc, $items, $customer, $company, $type);
     $dompdf->loadHtml($html);
@@ -62,7 +67,6 @@ if (isset($_GET['pdf'])) {
     exit;
 }
 
-// Otherwise display print-friendly HTML
 function renderDocument($doc, $items, $customer, $company, $type) {
     ob_start();
     ?>
@@ -73,21 +77,31 @@ function renderDocument($doc, $items, $customer, $company, $type) {
         <title><?= $doc['doc_number'] ?></title>
         <link rel="stylesheet" href="../assets/css/style.css">
         <style>
-            body { background: #fff; padding: 20px; }
-            .paper { max-width: 800px; margin: 0 auto; background: #f8f3e9; padding: 30px; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+            /* Print‑only styles – keep the cream paper and colors */
+            body { background: #fff; padding: 20px; margin: 0; }
+            .paper { max-width: 800px; margin: 0 auto; background: var(--paper) !important; padding: 30px; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); color: var(--ink) !important; }
             .print-actions { text-align: center; margin-bottom: 20px; }
-            .print-actions button { padding: 10px 24px; background: #b78c4a; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+            .print-actions button { padding: 10px 24px; background: var(--accent); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 0 6px; }
+            .print-actions button:hover { background: #A0783E; }
+            @media print {
+                .print-actions { display: none; }
+                body { padding: 0; background: #fff; }
+                .paper { box-shadow: none; border-radius: 0; padding: 20px; }
+            }
         </style>
     </head>
     <body>
-        <div class="print-actions">
+        <div class="print-actions no-print">
             <button onclick="window.print()"><i class="fas fa-print"></i> Print</button>
             <button onclick="window.location.href='print.php?type=<?= $type ?>&id=<?= $doc['id'] ?>&pdf=1'"><i class="fas fa-file-pdf"></i> Download PDF</button>
             <button onclick="window.close()">Close</button>
         </div>
         <div class="paper">
-            <!-- Document content – same as static prototype -->
+            <!-- Letterhead -->
             <p class="co-name"><?= esc($company['company_name']) ?></p>
+            <?php if ($company['logo']): ?>
+                <img src="<?= esc($company['logo']) ?>" style="display:block;margin:0 auto 8px;max-height:60px;" />
+            <?php endif; ?>
             <p class="co-tag"><b>MILLING</b> SYSTEMS, SUPPLIES &amp; SERVICE</p>
             <p class="co-sub">SPARES, EQUIPMENT &amp; ACCESSORIES</p>
             <hr class="hr">
@@ -96,10 +110,11 @@ function renderDocument($doc, $items, $customer, $company, $type) {
                 <p>P.O. Box: <?= esc($company['pobox'] ?? '') ?></p>
                 <p>Tel: <?= esc($company['phone']) ?></p>
                 <p>Email: <?= esc($company['email']) ?></p>
-                <p>TIN: <?= esc($company['tin']) ?></p>
-                <p>Reg. No.: <?= esc($company['registration_number']) ?></p>
-                <p>Web: <?= esc($company['website']) ?></p>
+                <?php if ($company['tin']): ?><p>TIN: <?= esc($company['tin']) ?></p><?php endif; ?>
+                <?php if ($company['registration_number']): ?><p>Reg. No.: <?= esc($company['registration_number']) ?></p><?php endif; ?>
+                <?php if ($company['website']): ?><p>Web: <?= esc($company['website']) ?></p><?php endif; ?>
             </div>
+
             <?php if ($type === 'DN'): ?>
             <div class="title-box"><span>DELIVERY NOTE</span></div>
             <div class="meta-row">
@@ -170,14 +185,20 @@ function renderDocument($doc, $items, $customer, $company, $type) {
             <div class="sig-grid"><div></div><div><div class="sig-line">Signature</div></div></div>
             <?php endif; ?>
         </div>
-        <script>
-            // Auto-print if requested (optional)
-        </script>
     </body>
     </html>
     <?php
     return ob_get_clean();
 }
 
+// If error, show message with return link
+if ($error) {
+    include '../includes/header.php';
+    echo '<div class="alert alert-warning">' . esc($error) . ' <a href="' . BASE_URL . 'dashboard.php" class="alert-link">Go to Dashboard</a></div>';
+    include '../includes/footer.php';
+    exit;
+}
+
+// Otherwise render the document
 echo renderDocument($doc, $items, $customer, $company, $type);
 ?>

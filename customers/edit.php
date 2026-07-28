@@ -31,20 +31,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include '../includes/header.php';
 ?>
 <h2>Edit Customer</h2>
-<?php if (isset($error)) echo '<div class="error">' . esc($error) . '</div>'; ?>
+<?php if (isset($error)): ?><div class="alert alert-danger"><?= esc($error) ?></div><?php endif; ?>
 <form method="post">
-    <div class="form-row">
-        <label>Name: <input type="text" name="name" value="<?= esc($customer['name']) ?>" required></label>
-        <label>Company: <input type="text" name="company" value="<?= esc($customer['company']) ?>"></label>
+    <div class="row">
+        <div class="col-md-6 mb-3"><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="<?= esc($customer['name']) ?>" required></div>
+        <div class="col-md-6 mb-3"><label class="form-label">Company</label><input type="text" name="company" class="form-control" value="<?= esc($customer['company']) ?>"></div>
     </div>
-    <div class="form-row">
-        <label>Phone: <input type="text" name="phone" value="<?= esc($customer['phone']) ?>"></label>
-        <label>Email: <input type="email" name="email" value="<?= esc($customer['email']) ?>"></label>
+    <div class="row">
+        <div class="col-md-6 mb-3"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" value="<?= esc($customer['phone']) ?>"></div>
+        <div class="col-md-6 mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="<?= esc($customer['email']) ?>"></div>
     </div>
-    <div class="form-row">
-        <label>Address: <textarea name="address"><?= esc($customer['address']) ?></textarea></label>
-    </div>
-    <button type="submit" class="btn"><i class="fas fa-save"></i> Update Customer</button>
-    <a href="index.php" class="btn btn-secondary">Cancel</a>
+    <div class="mb-3"><label class="form-label">Address</label><textarea name="address" class="form-control"><?= esc($customer['address']) ?></textarea></div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update Customer</button>
+    <a href="index.php" class="btn btn-outline-secondary">Cancel</a>
 </form>
 <?php include '../includes/footer.php'; ?>

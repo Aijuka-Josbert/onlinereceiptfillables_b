@@ -2,21 +2,19 @@
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
-requireAdmin(); // only admin
+requireAdmin();
 
 $settings = getCompany($pdo);
-$success = '';
-$error = '';
-
-// CSRF token
+$success = $error = '';
 $csrf_token = generateCSRFToken();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCSRFToken($_POST['csrf_token'] ?? '')) {
-        die('CSRF token validation failed.');
+        die('CSRF validation failed.');
     }
     $company_name = trim($_POST['company_name']);
     $address = trim($_POST['address']);
+    $pobox = trim($_POST['pobox']);
     $phone = trim($_POST['phone']);
     $email = trim($_POST['email']);
     $website = trim($_POST['website']);
@@ -27,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($company_name)) {
         $error = 'Company name is required.';
     } else {
-        $stmt = $pdo->prepare("UPDATE settings SET company_name=?, address=?, phone=?, email=?, website=?, tin=?, registration_number=?, logo=? WHERE id=1");
-        $stmt->execute([$company_name, $address, $phone, $email, $website, $tin, $registration_number, $logo]);
+        $stmt = $pdo->prepare("UPDATE settings SET company_name=?, address=?, pobox=?, phone=?, email=?, website=?, tin=?, registration_number=?, logo=? WHERE id=1");
+        $stmt->execute([$company_name, $address, $pobox, $phone, $email, $website, $tin, $registration_number, $logo]);
         $success = 'Settings updated successfully!';
         $settings = getCompany($pdo);
     }
@@ -43,7 +41,7 @@ include 'includes/header.php';
 <?php if ($error): ?>
     <div class="alert alert-danger"><?= esc($error) ?></div>
 <?php endif; ?>
-<form method="post">
+<form method="post" action="">
     <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
     <div class="row">
         <div class="col-md-6 mb-3">
@@ -57,7 +55,11 @@ include 'includes/header.php';
     </div>
     <div class="mb-3">
         <label class="form-label">Address</label>
-        <textarea name="address" class="form-control" rows="3"><?= esc($settings['address']) ?></textarea>
+        <textarea name="address" class="form-control" rows="2"><?= esc($settings['address']) ?></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">P.O. Box</label>
+        <input type="text" name="pobox" class="form-control" value="<?= esc($settings['pobox']) ?>">
     </div>
     <div class="row">
         <div class="col-md-4 mb-3">

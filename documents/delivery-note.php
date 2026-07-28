@@ -133,10 +133,9 @@ include '../includes/header.php';
     </div>
 
     <button type="submit" class="btn"><i class="fas fa-save"></i> Save Delivery Note</button>
-    <a href="print.php?type=DN&id=<?= $id ?>" class="btn btn-secondary" target="_blank"><i class="fas fa-print"></i> Print</a>
     <?php if ($isEdit): ?>
-    <a href="delivery-note.php" class="btn btn-secondary"><i class="fas fa-plus"></i> New</a>
-    <?php endif; ?>
+<a href="print.php?type=DN&id=<?= $id ?>" class="btn btn-secondary" target="_blank"><i class="fas fa-print"></i> Print</a>
+<?php endif; ?>
 </form>
 
 <!-- Live preview -->

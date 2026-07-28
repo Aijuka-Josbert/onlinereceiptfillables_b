@@ -11,15 +11,16 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Arvo:wght@700&family=Courier+Prime&family=Inter:opsz@14..32&display=swap" rel="stylesheet">
-    <!-- Custom styles (overrides) -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <!-- Custom styles – with cache‑busting version -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
     <style>
-        /* Override Bootstrap to keep your paper aesthetic for documents */
         body { background: var(--chrome-bg); font-family: 'Inter', sans-serif; }
+        .navbar { background: var(--chrome-panel) !important; border-bottom: 1px solid var(--chrome-line); }
         .navbar-brand { font-family: 'Arvo', serif; font-weight: 700; color: var(--accent) !important; }
         .navbar-brand strong { color: var(--chrome-text); }
-        .nav-link { color: var(--chrome-muted) !important; }
-        .nav-link:hover { color: var(--accent) !important; }
+        .navbar .nav-link { color: var(--chrome-text) !important; }
+        .navbar .nav-link:hover { color: var(--accent) !important; }
+        .navbar .navbar-text { color: var(--chrome-muted) !important; }
         .card { border-radius: var(--radius); border: 1px solid var(--chrome-line); box-shadow: var(--shadow-sm); }
         .card-header { background: var(--chrome-panel); border-bottom: 1px solid var(--chrome-line); }
         .btn-primary { background: var(--accent); border-color: var(--accent); }
@@ -32,48 +33,52 @@
         .text-muted { color: var(--chrome-muted) !important; }
         .breadcrumb-item a { color: var(--accent); text-decoration: none; }
         .breadcrumb-item.active { color: var(--chrome-text); }
-        .preview-container .paper { box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 20px 24px; min-height: 400px; background: var(--paper); color: var(--ink); }
         .stat-card { background: var(--chrome-panel); border: 1px solid var(--chrome-line); border-radius: var(--radius); padding: 16px 20px; text-align: center; box-shadow: var(--shadow-sm); }
         .stat-card i { font-size: 24px; color: var(--accent); display: block; margin-bottom: 6px; }
         .stat-card strong { font-size: 22px; display: block; }
+        .print-only { display: none; }
+        @media print {
+            .print-only { display: block; }
+            .no-print { display: none !important; }
+        }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+<nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-        <a class="navbar-brand" href="../dashboard.php"><strong>Fitwell</strong> Milling Systems</a>
+        <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php"><strong>Fitwell</strong> Milling Systems</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="../dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="../customers/"><i class="fas fa-users"></i> Customers</a></li>
-                <li class="nav-item"><a class="nav-link" href="../products/"><i class="fas fa-boxes"></i> Products</a></li>
-                <li class="nav-item"><a class="nav-link" href="../history/"><i class="fas fa-history"></i> History</a></li>
-                <?php if ($_SESSION['role'] === 'admin'): ?>
-                <li class="nav-item"><a class="nav-link" href="../settings.php"><i class="fas fa-cog"></i> Settings</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>customers/"><i class="fas fa-users"></i> Customers</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>products/"><i class="fas fa-boxes"></i> Products</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>history/"><i class="fas fa-history"></i> History</a></li>
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>settings.php"><i class="fas fa-cog"></i> Settings</a></li>
                 <?php endif; ?>
             </ul>
             <ul class="navbar-nav">
-                <li class="nav-item"><span class="navbar-text text-muted me-3"><i class="fas fa-user-circle"></i> <?= esc($_SESSION['username'] ?? '') ?></span></li>
-                <li class="nav-item"><a class="nav-link" href="../logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                <li class="nav-item"><span class="navbar-text me-3"><i class="fas fa-user-circle"></i> <?= esc($_SESSION['username'] ?? '') ?></span></li>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
 <div class="container mt-4">
-    <!-- Breadcrumb (optional) -->
+    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="../dashboard.php">Home</a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_URL ?>dashboard.php">Home</a></li>
             <?php
             $path = $_SERVER['REQUEST_URI'];
-            $segments = explode('/', trim($path, '/'));
+            $segments = explode('/', trim(parse_url($path, PHP_URL_PATH), '/'));
             $last = end($segments);
-            if ($last && $last !== 'dashboard.php') {
+            if ($last && $last !== 'dashboard.php' && $last !== 'index.php') {
                 echo '<li class="breadcrumb-item active">' . ucfirst(str_replace('.php', '', $last)) . '</li>';
             }
             ?>

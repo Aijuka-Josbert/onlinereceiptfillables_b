@@ -21,7 +21,6 @@ function generateDocNumber($type, $pdo) {
  */
 function numberToWords($num) {
     if ($num == 0) return 'Zero';
-    $words = '';
     $num = round($num, 2);
     $whole = floor($num);
     $cents = round(($num - $whole) * 100);
@@ -48,6 +47,7 @@ function numberToWords($num) {
         return $str;
     }
 
+    $words = '';
     $num = $whole;
     $scale = 0;
     while ($num > 0) {
@@ -63,7 +63,7 @@ function numberToWords($num) {
     if ($cents > 0) {
         $words .= ' and ' . $cents . '/100';
     }
-    return $words;
+    return $words ?: 'Zero';
 }
 
 /**
@@ -74,7 +74,7 @@ function esc($str) {
 }
 
 /**
- * Get company settings
+ * Get company settings (including pobox)
  */
 function getCompany($pdo) {
     $stmt = $pdo->query("SELECT * FROM settings WHERE id = 1");
@@ -89,13 +89,6 @@ function getCustomers($pdo) {
 }
 
 /**
- * Get products list (for dropdown)
- */
-function getProducts($pdo) {
-    return $pdo->query("SELECT id, name, unit_price FROM products ORDER BY name")->fetchAll();
-}
-
-/**
  * Get customer name by ID
  */
 function getCustomerName($pdo, $id) {
@@ -104,14 +97,11 @@ function getCustomerName($pdo, $id) {
     $row = $stmt->fetch();
     return $row['name'] ?? 'Unknown';
 }
-function generateCSRFToken() {
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    return $_SESSION['csrf_token'];
-}
 
-function verifyCSRFToken($token) {
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+/**
+ * Get products list (for dropdown)
+ */
+function getProducts($pdo) {
+    return $pdo->query("SELECT id, name, unit_price FROM products ORDER BY name")->fetchAll();
 }
 ?>
