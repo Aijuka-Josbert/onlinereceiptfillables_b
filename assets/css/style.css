@@ -525,11 +525,10 @@ table.doc-table td.right {
     grid-template-columns: 1fr 1fr;
   }
 }
-/* ===== Print styles – preserve color ===== */
+
+/* ===== PRINT STYLES – HIGH CONTRAST FOR READABILITY ===== */
 @media print {
-  body {
-    background: #fff !important;
-  }
+  /* Hide sidebar and controls */
   .sidebar {
     display: none !important;
   }
@@ -545,27 +544,57 @@ table.doc-table td.right {
   .paper-wrap::after {
     display: none !important;
   }
+
+  /* Document paper – pure white background + black text for maximum contrast */
   .paper {
     box-shadow: none !important;
     padding: 20px 24px !important;
     min-height: 0 !important;
-    background: var(--paper) !important;
-    color: var(--ink) !important;
+    background: #ffffff !important;
+    color: #000000 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  .paper .co-name,
-  .paper .title-box span {
-    color: var(--stamp) !important;
-  }
+
+  /* Force all text to black */
   .paper * {
+    color: #000000 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  table.doc-table th {
-    background: var(--rule) !important;
+
+  /* Keep the title box and stamp red for visual distinction, but ensure it's readable */
+  .paper .title-box span {
+    color: #a53f2f !important;
   }
+  .paper .co-name {
+    color: #000000 !important;
+  }
+
+  /* Table headers – dark gray for contrast */
+  table.doc-table th {
+    background: #d0d0d0 !important;
+    color: #000000 !important;
+  }
+
+  /* Table borders – darker for clarity */
+  table.doc-table th,
+  table.doc-table td {
+    border: 1.5px solid #333333 !important;
+  }
+
+  /* Underlines and signature lines – solid black */
+  .fill-line .under {
+    border-bottom: 1.5px solid #000000 !important;
+  }
+  .sig-line {
+    border-top: 1.5px solid #000000 !important;
+  }
+  .hr {
+    border-top: 2px solid #000000 !important;
+  }
+
   .paper-footer {
-    color: var(--ink-soft) !important;
+    color: #333333 !important;
   }
 }

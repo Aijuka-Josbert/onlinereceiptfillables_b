@@ -5,9 +5,9 @@
  * ============================================================
  */
 
-// ===== STATE =====
+// ===== STATE – default active is 'rc' (Receipt) =====
 const state = {
-    activeDoc: 'dn',
+    activeDoc: 'rc',
     dn: { rows: [] },
     pf: { rows: [] },
 };
@@ -203,8 +203,36 @@ function renderPreview() {
     let body = '';
     const active = state.activeDoc;
 
-    // ----- Delivery Note -----
-    if (active === 'dn') {
+    // ----- Receipt (now first) -----
+    if (active === 'rc') {
+        const amount = num(val('rc-amt'));
+        const wordsInput = $('rc-words');
+        if (wordsInput) wordsInput.value = numberToWords(amount);
+        body = `
+            <div class="title-box"><span>RECEIPT</span></div>
+            <div class="meta-row">
+                <span>No. ${esc(val('rc-no'))}</span>
+                <span>Date: ${esc(val('rc-date')) || '____/____/____'}</span>
+            </div>
+            <p class="fill-line"><b>Received with thanks from:</b><span class="under">${esc(val('rc-from'))}</span></p>
+            <p class="fill-line"><b>Being payment of:</b><span class="under">${esc(val('rc-for'))}</span></p>
+            <p class="fill-line"><b>Payment Method:</b><span class="under">${esc(val('rc-method'))}</span></p>
+            <p class="fill-line"><b>Amount in words:</b><span class="under">${esc(val('rc-words'))}</span></p>
+            <p class="fill-line">
+                <b>Cash / Cheque No.:</b><span class="under">${esc(val('rc-cash'))}</span>
+                <b style="margin-left:20px;">Balance:</b><span class="under">${esc(val('rc-bal'))}</span>
+            </p>
+            <p class="fill-line" style="font-size:16px;font-weight:700;">
+                <b>Amount (UGX/USD):</b><span class="under">${esc(val('rc-amt'))}</span>
+            </p>
+            <div class="sig-grid">
+                <div><div class="sig-line">Issued by: ${esc(val('rc-issued'))}</div></div>
+                <div><div class="sig-line">Signature</div></div>
+            </div>
+        `;
+    }
+    // ----- Delivery Note (second) -----
+    else if (active === 'dn') {
         const applyVat = $('dn-vat').checked;
         const rows = state.dn.rows.map(r => {
             const q = num(r.qty), rate = num(r.rate);
@@ -214,7 +242,7 @@ function renderPreview() {
         const subtotal = rows.reduce((s, r) => s + (r.amt || 0), 0);
         const vat = applyVat ? subtotal * 0.18 : 0;
         const total = subtotal + vat;
-
+        
         const wordsInput = $('dn-words');
         if (wordsInput) wordsInput.value = numberToWords(total);
 
@@ -254,35 +282,7 @@ function renderPreview() {
             </div>
         `;
     }
-    // ----- Receipt -----
-    else if (active === 'rc') {
-        const amount = num(val('rc-amt'));
-        const wordsInput = $('rc-words');
-        if (wordsInput) wordsInput.value = numberToWords(amount);
-        body = `
-            <div class="title-box"><span>RECEIPT</span></div>
-            <div class="meta-row">
-                <span>No. ${esc(val('rc-no'))}</span>
-                <span>Date: ${esc(val('rc-date')) || '____/____/____'}</span>
-            </div>
-            <p class="fill-line"><b>Received with thanks from:</b><span class="under">${esc(val('rc-from'))}</span></p>
-            <p class="fill-line"><b>Being payment of:</b><span class="under">${esc(val('rc-for'))}</span></p>
-            <p class="fill-line"><b>Payment Method:</b><span class="under">${esc(val('rc-method'))}</span></p>
-            <p class="fill-line"><b>Amount in words:</b><span class="under">${esc(val('rc-words'))}</span></p>
-            <p class="fill-line">
-                <b>Cash / Cheque No.:</b><span class="under">${esc(val('rc-cash'))}</span>
-                <b style="margin-left:20px;">Balance:</b><span class="under">${esc(val('rc-bal'))}</span>
-            </p>
-            <p class="fill-line" style="font-size:16px;font-weight:700;">
-                <b>Amount (UGX/USD):</b><span class="under">${esc(val('rc-amt'))}</span>
-            </p>
-            <div class="sig-grid">
-                <div><div class="sig-line">Issued by: ${esc(val('rc-issued'))}</div></div>
-                <div><div class="sig-line">Signature</div></div>
-            </div>
-        `;
-    }
-    // ----- Proforma Invoice -----
+    // ----- Proforma Invoice (third) -----
     else if (active === 'pf') {
         const applyVat = $('pf-vat').checked;
         const rows = state.pf.rows.map(r => {
@@ -293,7 +293,7 @@ function renderPreview() {
         const subtotal = rows.reduce((s, r) => s + (r.amt || 0), 0);
         const vat = applyVat ? subtotal * 0.18 : 0;
         const total = subtotal + vat;
-
+        
         const wordsInput = $('pf-words');
         if (wordsInput) wordsInput.value = numberToWords(total);
 
@@ -390,7 +390,7 @@ function loadFromStorage() {
 
 // ===== PANEL SWITCHING =====
 function showPanel(doc) {
-    ['dn', 'rc', 'pf'].forEach(d => {
+    ['rc', 'dn', 'pf'].forEach(d => {
         const panel = $('panel-' + d);
         if (panel) panel.style.display = (d === doc) ? 'block' : 'none';
     });
@@ -431,7 +431,7 @@ document.addEventListener('change', function (e) {
 // ===== TODAY'S DATE =====
 function setTodayDates() {
     const today = new Date().toISOString().split('T')[0];
-    ['dn-date', 'rc-date', 'pf-date'].forEach(id => {
+    ['rc-date', 'dn-date', 'pf-date'].forEach(id => {
         const el = $(id);
         if (el && !el.value) el.value = today;
     });

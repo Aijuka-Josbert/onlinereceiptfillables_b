@@ -69,7 +69,6 @@ No external frameworks, libraries, or build tools are required – the entire ap
 1. Push the repository to GitHub.
 2. Go to your repository **Settings** → **Pages**.
 3. Select the branch (e.g., `main`) and root folder.
-4. Save – your site will be live at `https://<username>.github.io/<repository>/`.
 
 ---
 
