@@ -1,3 +1,15 @@
+<?php
+// index.php
+require_once 'includes/db.php';
+require_once 'includes/auth.php';
+
+if (isLoggedIn()) {
+    header('Location: dashboard.php');
+} else {
+    header('Location: login.php');
+}
+exit;
+?>
 <!doctype html>
 <html lang="en">
   <head>
