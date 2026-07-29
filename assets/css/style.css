@@ -1,12 +1,15 @@
-/* ===== CSS Variables (Light / Dark) ===== */
+/* ============================================================
+   Document Generator — Stylesheet
+   Two independent theming layers:
+   1. --chrome-*  → the app UI (sidebar), toggled light/dark
+   2. --doc-*     → the printed document itself, one palette per
+                    document type (Delivery Note / Receipt / Proforma),
+                    fully customizable per document via the Appearance
+                    panel and stored in localStorage.
+   ============================================================ */
+
 :root {
-  --paper: #f8f3e9;
-  --paper-shadow-1: #e6dbc8;
-  --paper-shadow-2: #d0cdbb;
-  --ink: #1e1b16;
-  --ink-soft: #4a443a;
-  --stamp: #a53f2f;
-  --rule: #b7ac93;
+  /* ---- App chrome (UI) ---- */
   --chrome-bg: #f0ede7;
   --chrome-panel: #ffffff;
   --chrome-line: #dcd7cf;
@@ -16,15 +19,17 @@
   --input-bg: #faf8f5;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --radius: 8px;
+
+  /* ---- Document paper (defaults — overridden per doc by JS) ---- */
+  --doc-paper: #f8f3e9;
+  --doc-ink: #1e1b16;
+  --doc-ink-soft: #4a443a;
+  --doc-stamp: #a53f2f;
+  --doc-rule: #b7ac93;
+  --paper-shadow-1: #e6dbc8;
+  --paper-shadow-2: #d0cdbb;
 }
 body.dark {
-  --paper: #1e1b16;
-  --paper-shadow-1: #0f0e0a;
-  --paper-shadow-2: #1a1812;
-  --ink: #edeae0;
-  --ink-soft: #b8b0a0;
-  --stamp: #d97a6a;
-  --rule: #5a4f3e;
   --chrome-bg: #1a1816;
   --chrome-panel: #26231e;
   --chrome-line: #3a3530;
@@ -33,12 +38,23 @@ body.dark {
   --accent: #d9a441;
   --input-bg: #2e2a24;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --paper-shadow-1: #0f0e0a;
+  --paper-shadow-2: #1a1812;
 }
+
 /* ===== Reset & Base ===== */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 body {
   margin: 0;
@@ -59,6 +75,7 @@ body {
   grid-template-columns: 380px 1fr;
   min-height: 100vh;
 }
+
 /* ===== Sidebar ===== */
 .sidebar {
   background: var(--chrome-panel);
@@ -84,7 +101,7 @@ body {
 .brand strong {
   color: var(--accent);
 }
-h1 {
+.sidebar-title {
   font-size: 22px;
   font-weight: 600;
   margin: 0;
@@ -162,6 +179,10 @@ select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(183, 140, 74, 0.15);
 }
+input[readonly] {
+  opacity: 0.85;
+  cursor: default;
+}
 textarea {
   resize: vertical;
   min-height: 56px;
@@ -169,7 +190,7 @@ textarea {
 fieldset {
   border: 1px solid var(--chrome-line);
   border-radius: var(--radius);
-  padding: 14px 14px 6px;
+  padding: 14px 14px 16px;
   margin: 0 0 20px;
   background: var(--chrome-panel);
 }
@@ -184,6 +205,61 @@ legend {
 legend i {
   margin-right: 6px;
 }
+
+/* ===== Logo upload ===== */
+.logo-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.upload-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.upload-btn:hover {
+  filter: brightness(1.08);
+}
+.upload-btn.ghost {
+  background: transparent;
+  color: var(--chrome-muted);
+  border: 1px solid var(--chrome-line);
+  flex: 0 0 auto;
+}
+.upload-btn.ghost:hover {
+  color: var(--chrome-text);
+  border-color: var(--chrome-muted);
+}
+.logo-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--chrome-muted);
+}
+.logo-preview-row img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  background: var(--input-bg);
+  border: 1px solid var(--chrome-line);
+  border-radius: 6px;
+  padding: 4px;
+}
+
+/* ===== Item rows ===== */
 .row-item {
   border: 1px solid var(--chrome-line);
   border-radius: var(--radius);
@@ -260,6 +336,78 @@ legend i {
 .check-row input {
   width: auto;
 }
+
+/* ===== Appearance / theme picker ===== */
+.appearance-fieldset {
+  background: var(--input-bg);
+}
+.swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--chrome-panel);
+  outline: 1px solid var(--chrome-line);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    transform 0.15s,
+    outline-color 0.15s;
+}
+.swatch:hover {
+  transform: scale(1.12);
+}
+.swatch.active {
+  outline: 2px solid var(--chrome-text);
+  outline-offset: 1px;
+}
+.color-pick-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.color-pick {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.color-pick span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--chrome-muted);
+}
+.color-pick input[type="color"] {
+  width: 100%;
+  height: 32px;
+  padding: 2px;
+  cursor: pointer;
+}
+.theme-reset {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--chrome-line);
+  color: var(--chrome-muted);
+  padding: 8px;
+  border-radius: var(--radius);
+  font-size: 11.5px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.theme-reset:hover {
+  color: var(--chrome-text);
+  border-color: var(--chrome-muted);
+}
+
+/* ===== Action buttons ===== */
 .action-row {
   display: flex;
   gap: 8px;
@@ -308,7 +456,7 @@ legend i {
   margin-right: 8px;
 }
 .print-btn:hover {
-  background: #a0783e;
+  filter: brightness(1.08);
   transform: translateY(-2px);
 }
 .hint {
@@ -324,6 +472,7 @@ legend i {
   font-size: 11px;
   font-family: inherit;
 }
+
 /* ===== Preview Stage ===== */
 .stage {
   display: flex;
@@ -360,8 +509,8 @@ legend i {
 .paper {
   position: relative;
   z-index: 1;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--doc-paper);
+  color: var(--doc-ink);
   padding: 40px 44px 48px;
   font-family: "Courier Prime", monospace;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
@@ -370,6 +519,13 @@ legend i {
     background 0.25s,
     color 0.25s;
   border-radius: 2px;
+}
+.co-logo {
+  display: block;
+  max-height: 64px;
+  max-width: 220px;
+  margin: 0 auto 10px;
+  object-fit: contain;
 }
 .co-name {
   font-family: "Arvo", serif;
@@ -383,20 +539,12 @@ legend i {
   text-align: center;
   font-size: 12px;
   letter-spacing: 0.04em;
-  margin: 0 0 2px;
-}
-.co-tag b {
-  font-weight: 700;
-}
-.co-sub {
-  text-align: center;
-  font-size: 11px;
-  color: var(--ink-soft);
   margin: 0 0 14px;
+  color: var(--doc-ink-soft);
 }
 .hr {
   border: none;
-  border-top: 1.5px solid var(--ink);
+  border-top: 1.5px solid var(--doc-ink);
   margin: 0 0 14px;
 }
 .addr-block p {
@@ -404,7 +552,7 @@ legend i {
   font-size: 11.5px;
 }
 .title-box {
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--doc-ink);
   text-align: center;
   padding: 8px 0;
   margin: 16px 0 14px;
@@ -413,7 +561,7 @@ legend i {
   font-family: "Arvo", serif;
   font-weight: 700;
   font-size: 19px;
-  color: var(--stamp);
+  color: var(--doc-stamp);
   letter-spacing: 0.08em;
 }
 .meta-row {
@@ -438,13 +586,13 @@ table.doc-table {
 }
 table.doc-table th,
 table.doc-table td {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--doc-ink);
   padding: 6px 8px;
   font-size: 11.5px;
   vertical-align: top;
 }
 table.doc-table th {
-  background: var(--rule);
+  background: var(--doc-rule);
   text-align: center;
   font-size: 10.5px;
   text-transform: uppercase;
@@ -466,7 +614,7 @@ table.doc-table td.right {
 }
 .fill-line .under {
   flex: 1;
-  border-bottom: 1px dotted var(--ink-soft);
+  border-bottom: 1px dotted var(--doc-ink-soft);
   min-height: 16px;
 }
 .sig-grid {
@@ -477,7 +625,7 @@ table.doc-table td.right {
   font-size: 12px;
 }
 .sig-line {
-  border-top: 1px solid var(--ink);
+  border-top: 1px solid var(--doc-ink);
   margin-top: 26px;
   padding-top: 4px;
 }
@@ -485,9 +633,10 @@ table.doc-table td.right {
   text-align: center;
   font-size: 10.5px;
   font-style: italic;
-  color: var(--ink-soft);
+  color: var(--doc-ink-soft);
   margin-top: 18px;
 }
+
 /* ===== Responsive ===== */
 @media (max-width: 960px) {
   .app {
@@ -524,11 +673,13 @@ table.doc-table td.right {
   .row-item .row-grid {
     grid-template-columns: 1fr 1fr;
   }
+  .color-pick-row {
+    flex-wrap: wrap;
+  }
 }
 
-/* ===== PRINT STYLES – HIGH CONTRAST FOR READABILITY ===== */
+/* ===== PRINT STYLES ===== */
 @media print {
-  /* Hide sidebar and controls */
   .sidebar {
     display: none !important;
   }
@@ -545,56 +696,38 @@ table.doc-table td.right {
     display: none !important;
   }
 
-  /* Document paper – pure white background + black text for maximum contrast */
+  /* Preserve each document's own paper + ink so printed copies stay
+     visually distinguishable, while keeping print-friendly contrast. */
   .paper {
     box-shadow: none !important;
     padding: 20px 24px !important;
     min-height: 0 !important;
-    background: #ffffff !important;
-    color: #000000 !important;
+    background: var(--doc-paper) !important;
+    color: var(--doc-ink) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-
-  /* Force all text to black */
   .paper * {
-    color: #000000 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-
-  /* Keep the title box and stamp red for visual distinction, but ensure it's readable */
-  .paper .title-box span {
-    color: #a53f2f !important;
+  .title-box span {
+    color: var(--doc-stamp) !important;
   }
-  .paper .co-name {
-    color: #000000 !important;
-  }
-
-  /* Table headers – dark gray for contrast */
   table.doc-table th {
-    background: #d0d0d0 !important;
-    color: #000000 !important;
+    background: var(--doc-rule) !important;
   }
-
-  /* Table borders – darker for clarity */
   table.doc-table th,
   table.doc-table td {
-    border: 1.5px solid #333333 !important;
+    border: 1.3px solid var(--doc-ink) !important;
   }
-
-  /* Underlines and signature lines – solid black */
   .fill-line .under {
-    border-bottom: 1.5px solid #000000 !important;
+    border-bottom: 1.3px solid var(--doc-ink-soft) !important;
   }
   .sig-line {
-    border-top: 1.5px solid #000000 !important;
+    border-top: 1.3px solid var(--doc-ink) !important;
   }
   .hr {
-    border-top: 2px solid #000000 !important;
-  }
-
-  .paper-footer {
-    color: #333333 !important;
+    border-top: 1.8px solid var(--doc-ink) !important;
   }
 }

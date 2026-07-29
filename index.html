@@ -2,10 +2,81 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Fitwell Milling Systems — Document Book</title>
+    <title>
+      Document Generator — Free Online Delivery Note, Receipt &amp; Proforma
+      Invoice Maker
+    </title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- ===== SEO ===== -->
+    <meta
+      name="description"
+      content="Create professional delivery notes, receipts, and proforma invoices online — free. Add your own logo and brand colors, auto-calculate totals and VAT, and print or save as PDF instantly. Works for any business."
+    />
+    <meta
+      name="keywords"
+      content="receipt generator, delivery note generator, proforma invoice generator, free invoice maker, printable receipt, online billing tool, receipt maker, invoice maker Uganda"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="BeyondCode Tech Solutions" />
+    <meta name="theme-color" content="#2F6690" />
+    <link
+      rel="canonical"
+      href="https://aijuka-josbert.github.io/onlinereceiptfillables_b/"
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Document Generator" />
+    <meta
+      property="og:title"
+      content="Document Generator — Free Online Delivery Note, Receipt & Proforma Invoice Maker"
+    />
+    <meta
+      property="og:description"
+      content="Create branded delivery notes, receipts, and proforma invoices online. Your logo, your colors, instant PDF."
+    />
+    <meta
+      property="og:url"
+      content="https://aijuka-josbert.github.io/onlinereceiptfillables_b/"
+    />
+    <meta property="og:image" content="./assets/og-image.png" />
+    <!-- Tip: add a 1200x630 screenshot of the app at assets/og-image.png so links preview nicely when shared -->
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Document Generator — Free Online Delivery Note, Receipt & Proforma Invoice Maker"
+    />
+    <meta
+      name="twitter:description"
+      content="Create branded delivery notes, receipts, and proforma invoices online. Your logo, your colors, instant PDF."
+    />
+    <meta name="twitter:image" content="./assets/og-image.png" />
+
+    <!-- Favicon (inline SVG, no extra file needed) -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%232F6690'/%3E%3Cpath d='M28 22h44a4 4 0 0 1 4 4v56l-9-6-9 6-9-6-9 6-9-6-9 6V26a4 4 0 0 1 4-4z' fill='%23fff'/%3E%3Cpath d='M36 38h28M36 48h28M36 58h18' stroke='%232F6690' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Document Generator",
+        "description": "Free online tool to create delivery notes, receipts, and proforma invoices with custom logos and brand colors.",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Any",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Arvo:wght@700&family=Inter:opsz@14..32&display=swap"
       rel="stylesheet"
@@ -18,23 +89,32 @@
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
+    <h1 class="sr-only">
+      Free Online Document Generator — Delivery Notes, Receipts and Proforma
+      Invoices
+    </h1>
     <div class="app" id="app">
       <!-- ===== SIDEBAR ===== -->
-      <aside class="sidebar" id="sidebar">
+      <aside class="sidebar" id="sidebar" aria-label="Document editor">
         <div class="sidebar-header">
-          <p class="brand"><strong>Fitwell</strong> Milling Systems</p>
-          <h1>Create your document</h1>
+          <p class="brand"><strong>Doc</strong>Craft</p>
+          <p class="sidebar-title">Create your document</p>
         </div>
 
         <!-- Tabs -->
-        <div class="tabs" id="tabs">
-          <button class="tab active" data-doc="dn">
+        <div class="tabs" id="tabs" role="tablist">
+          <button
+            class="tab active"
+            data-doc="dn"
+            role="tab"
+            aria-selected="true"
+          >
             <i class="fas fa-truck"></i> Delivery Note
           </button>
-          <button class="tab" data-doc="rc">
+          <button class="tab" data-doc="rc" role="tab" aria-selected="false">
             <i class="fas fa-receipt"></i> Receipt
           </button>
-          <button class="tab" data-doc="pf">
+          <button class="tab" data-doc="pf" role="tab" aria-selected="false">
             <i class="fas fa-file-invoice"></i> Proforma Invoice
           </button>
         </div>
@@ -43,49 +123,70 @@
         <fieldset>
           <legend><i class="fas fa-building"></i> Letterhead</legend>
           <div class="field-group">
-            <label>Company Name</label>
-            <input id="hd-name" value="FITWELL MILLING SYSTEMS (U) LIMITED" />
+            <label for="hd-name">Company Name</label>
+            <input id="hd-name" placeholder="Your Company Name" />
           </div>
           <div class="field-group">
-            <label>Company Logo (URL)</label>
-            <input id="hd-logo" placeholder="https://example.com/logo.png" />
-          </div>
-          <div class="field-group">
-            <label>Address</label>
+            <label for="hd-tagline">Tagline / Line of Business</label>
             <input
-              id="hd-addr"
-              value="Plot 14, Kifumbira Rd, Ntinda, Kampala"
+              id="hd-tagline"
+              placeholder="e.g. Suppliers of Milling Equipment"
             />
+          </div>
+
+          <div class="field-group">
+            <label>Company Logo</label>
+            <div class="logo-controls">
+              <label class="upload-btn" for="hd-logo-file">
+                <i class="fas fa-upload"></i> Upload image
+                <input type="file" id="hd-logo-file" accept="image/*" hidden />
+              </label>
+              <button type="button" class="upload-btn ghost" id="hd-logo-clear">
+                <i class="fas fa-times"></i> Remove
+              </button>
+            </div>
+            <input
+              id="hd-logo-url"
+              placeholder="or paste an image link (https://...)"
+              style="margin-top: 8px"
+            />
+            <div class="logo-preview-row" id="logo-preview-row" hidden>
+              <img id="logo-preview" alt="Logo preview" />
+              <span>Logo ready — it will appear on every document.</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="hd-addr">Address</label>
+            <input id="hd-addr" placeholder="Plot 00, Street, City" />
           </div>
           <div class="field-group two-col">
             <div>
-              <label>P.O. Box</label
-              ><input id="hd-pobox" value="9021, Kampala, Uganda" />
+              <label for="hd-pobox">P.O. Box</label>
+              <input id="hd-pobox" placeholder="0000, City, Country" />
             </div>
             <div>
-              <label>Telephone</label
-              ><input id="hd-phone" value="+256 701 220345 / +256 782 559011" />
+              <label for="hd-phone">Telephone</label>
+              <input id="hd-phone" placeholder="+256 700 000000" />
             </div>
           </div>
           <div class="field-group">
-            <label>Email</label>
-            <input
-              id="hd-email"
-              value="info@fitwellmilling.co.ug  |  admin@fitwellmilling.co.ug"
-            />
+            <label for="hd-email">Email</label>
+            <input id="hd-email" placeholder="info@yourcompany.com" />
           </div>
           <div class="field-group two-col">
             <div>
-              <label>TIN</label><input id="hd-tin" value="1012345678" />
+              <label for="hd-tin">TIN (optional)</label>
+              <input id="hd-tin" placeholder="Leave blank if none" />
             </div>
             <div>
-              <label>Reg. No.</label
-              ><input id="hd-reg" value="80020001234567" />
+              <label for="hd-reg">Reg. No. (optional)</label>
+              <input id="hd-reg" placeholder="Leave blank if none" />
             </div>
           </div>
           <div class="field-group">
-            <label>Website</label>
-            <input id="hd-web" value="www.fitwellmilling.co.ug" />
+            <label for="hd-web">Website (optional)</label>
+            <input id="hd-web" placeholder="www.yourcompany.com" />
           </div>
         </fieldset>
 
@@ -95,25 +196,29 @@
             <legend><i class="fas fa-file-signature"></i> Delivery Note</legend>
             <div class="field-group two-col">
               <div>
-                <label>Document No.</label><input id="dn-no" value="001" />
+                <label for="dn-no">Document No.</label
+                ><input id="dn-no" value="001" />
               </div>
-              <div><label>Date</label><input id="dn-date" type="date" /></div>
+              <div>
+                <label for="dn-date">Date</label
+                ><input id="dn-date" type="date" />
+              </div>
             </div>
             <div class="field-group">
-              <label>Client Name</label>
+              <label for="dn-client">Client Name</label>
               <input id="dn-client" placeholder="Client name" />
             </div>
             <div class="field-group">
-              <label>Client Address</label>
+              <label for="dn-client-addr">Client Address</label>
               <input id="dn-client-addr" placeholder="Client address" />
             </div>
             <div class="field-group two-col">
               <div>
-                <label>Contact Person</label
+                <label for="dn-contact">Contact Person</label
                 ><input id="dn-contact" placeholder="Contact person" />
               </div>
               <div>
-                <label>Phone Number</label
+                <label for="dn-phone">Phone Number</label
                 ><input id="dn-phone" placeholder="Phone number" />
               </div>
             </div>
@@ -121,7 +226,7 @@
           <fieldset>
             <legend><i class="fas fa-list"></i> Items</legend>
             <div id="dn-rows"></div>
-            <button class="add-row" id="dn-add-row">
+            <button class="add-row" id="dn-add-row" type="button">
               <i class="fas fa-plus-circle"></i> Add item
             </button>
           </fieldset>
@@ -131,19 +236,46 @@
             </legend>
             <div class="check-row">
               <input type="checkbox" id="dn-vat" />
-              <label style="margin: 0">Apply 18% VAT</label>
+              <label style="margin: 0" for="dn-vat">Apply 18% VAT</label>
             </div>
             <div class="field-group">
-              <label>Amount in words</label>
+              <label for="dn-words">Amount in words</label>
               <input
                 id="dn-words"
-                placeholder="e.g. Five hundred thousand shillings only"
+                placeholder="auto-filled from total"
+                readonly
               />
             </div>
             <div class="field-group two-col">
-              <div><label>Delivered by</label><input id="dn-delby" /></div>
-              <div><label>Received by</label><input id="dn-recby" /></div>
+              <div>
+                <label for="dn-delby">Delivered by</label
+                ><input id="dn-delby" />
+              </div>
+              <div>
+                <label for="dn-recby">Received by</label><input id="dn-recby" />
+              </div>
             </div>
+          </fieldset>
+          <fieldset class="appearance-fieldset">
+            <legend><i class="fas fa-palette"></i> Delivery Note colors</legend>
+            <div class="swatch-row" data-doc="dn"></div>
+            <div class="color-pick-row">
+              <label class="color-pick">
+                <span>Background</span>
+                <input type="color" id="dn-c-paper" />
+              </label>
+              <label class="color-pick">
+                <span>Text</span>
+                <input type="color" id="dn-c-ink" />
+              </label>
+              <label class="color-pick">
+                <span>Accent</span>
+                <input type="color" id="dn-c-accent" />
+              </label>
+            </div>
+            <button class="theme-reset" type="button" data-doc="dn">
+              Reset to default colors
+            </button>
           </fieldset>
         </div>
 
@@ -153,23 +285,27 @@
             <legend><i class="fas fa-receipt"></i> Receipt</legend>
             <div class="field-group two-col">
               <div>
-                <label>Receipt No.</label><input id="rc-no" value="001" />
+                <label for="rc-no">Receipt No.</label
+                ><input id="rc-no" value="001" />
               </div>
-              <div><label>Date</label><input id="rc-date" type="date" /></div>
+              <div>
+                <label for="rc-date">Date</label
+                ><input id="rc-date" type="date" />
+              </div>
             </div>
             <div class="field-group">
-              <label>Received From</label>
+              <label for="rc-from">Received From</label>
               <input id="rc-from" placeholder="Client name" />
             </div>
             <div class="field-group">
-              <label>Payment Description</label>
+              <label for="rc-for">Payment Description</label>
               <textarea
                 id="rc-for"
                 placeholder="Description of goods or service"
               ></textarea>
             </div>
             <div class="field-group">
-              <label>Payment Method</label>
+              <label for="rc-method">Payment Method</label>
               <select id="rc-method">
                 <option value="Cash">Cash</option>
                 <option value="Cheque">Cheque</option>
@@ -179,26 +315,51 @@
             </div>
             <div class="field-group two-col">
               <div>
-                <label>Cash / Cheque No.</label
-                ><input id="rc-cash" value="Cash" />
+                <label for="rc-cash">Cash / Cheque No.</label>
+                <input id="rc-cash" placeholder="Cash" />
               </div>
-              <div><label>Balance</label><input id="rc-bal" value="NIL" /></div>
+              <div>
+                <label for="rc-bal">Balance</label
+                ><input id="rc-bal" placeholder="NIL" />
+              </div>
             </div>
             <div class="field-group">
-              <label>Amount (UGX / USD)</label>
-              <input id="rc-amt" placeholder="0" />
+              <label for="rc-amt">Amount (UGX / USD)</label>
+              <input id="rc-amt" placeholder="0" inputmode="decimal" />
             </div>
             <div class="field-group">
-              <label>Amount in words</label>
+              <label for="rc-words">Amount in words</label>
               <input
                 id="rc-words"
-                placeholder="e.g. Five hundred thousand shillings only"
+                placeholder="auto-filled from amount"
+                readonly
               />
             </div>
             <div class="field-group">
-              <label>Issued By</label>
+              <label for="rc-issued">Issued By</label>
               <input id="rc-issued" />
             </div>
+          </fieldset>
+          <fieldset class="appearance-fieldset">
+            <legend><i class="fas fa-palette"></i> Receipt colors</legend>
+            <div class="swatch-row" data-doc="rc"></div>
+            <div class="color-pick-row">
+              <label class="color-pick">
+                <span>Background</span>
+                <input type="color" id="rc-c-paper" />
+              </label>
+              <label class="color-pick">
+                <span>Text</span>
+                <input type="color" id="rc-c-ink" />
+              </label>
+              <label class="color-pick">
+                <span>Accent</span>
+                <input type="color" id="rc-c-accent" />
+              </label>
+            </div>
+            <button class="theme-reset" type="button" data-doc="rc">
+              Reset to default colors
+            </button>
           </fieldset>
         </div>
 
@@ -210,28 +371,32 @@
             </legend>
             <div class="field-group two-col">
               <div>
-                <label>Invoice No.</label><input id="pf-no" value="001" />
+                <label for="pf-no">Invoice No.</label
+                ><input id="pf-no" value="001" />
               </div>
-              <div><label>Date</label><input id="pf-date" type="date" /></div>
+              <div>
+                <label for="pf-date">Date</label
+                ><input id="pf-date" type="date" />
+              </div>
             </div>
             <div class="field-group">
-              <label>M/s (Client)</label>
+              <label for="pf-client">M/s (Client)</label>
               <input id="pf-client" placeholder="Client name" />
             </div>
             <div class="field-group">
-              <label>Client Address</label>
+              <label for="pf-client-addr">Client Address</label>
               <input id="pf-client-addr" placeholder="Client address" />
             </div>
           </fieldset>
           <fieldset>
             <legend><i class="fas fa-list"></i> Items</legend>
             <div id="pf-rows"></div>
-            <button class="add-row" id="pf-add-row">
+            <button class="add-row" id="pf-add-row" type="button">
               <i class="fas fa-plus-circle"></i> Add item
             </button>
             <div class="check-row" style="margin-top: 12px">
               <input type="checkbox" id="pf-vat" />
-              <label style="margin: 0">Apply 18% VAT</label>
+              <label style="margin: 0" for="pf-vat">Apply 18% VAT</label>
             </div>
           </fieldset>
           <fieldset>
@@ -239,53 +404,78 @@
               <i class="fas fa-file-contract"></i> Terms &amp; Contact
             </legend>
             <div class="field-group">
-              <label>Payment Terms</label>
+              <label for="pf-terms">Payment Terms</label>
               <input id="pf-terms" value="Cash on delivery" />
             </div>
             <div class="field-group">
-              <label>Contact Information</label>
+              <label for="pf-contact">Contact Information</label>
               <input id="pf-contact" placeholder="Phone number" />
             </div>
             <div class="field-group">
-              <label>Amount in words</label>
+              <label for="pf-words">Amount in words</label>
               <input
                 id="pf-words"
-                placeholder="e.g. Five hundred thousand shillings only"
+                placeholder="auto-filled from total"
+                readonly
               />
             </div>
+          </fieldset>
+          <fieldset class="appearance-fieldset">
+            <legend>
+              <i class="fas fa-palette"></i> Proforma Invoice colors
+            </legend>
+            <div class="swatch-row" data-doc="pf"></div>
+            <div class="color-pick-row">
+              <label class="color-pick">
+                <span>Background</span>
+                <input type="color" id="pf-c-paper" />
+              </label>
+              <label class="color-pick">
+                <span>Text</span>
+                <input type="color" id="pf-c-ink" />
+              </label>
+              <label class="color-pick">
+                <span>Accent</span>
+                <input type="color" id="pf-c-accent" />
+              </label>
+            </div>
+            <button class="theme-reset" type="button" data-doc="pf">
+              Reset to default colors
+            </button>
           </fieldset>
         </div>
 
         <!-- Action buttons -->
         <div class="action-row">
-          <button class="action-btn" id="btn-today">
+          <button class="action-btn" id="btn-today" type="button">
             <i class="fas fa-calendar-day"></i> Today
           </button>
-          <button class="action-btn" id="btn-reset">
+          <button class="action-btn" id="btn-reset" type="button">
             <i class="fas fa-undo-alt"></i> Reset
           </button>
-          <button class="action-btn" id="btn-duplicate">
+          <button class="action-btn" id="btn-duplicate" type="button">
             <i class="fas fa-copy"></i> Duplicate
           </button>
-          <button class="action-btn" id="btn-clear">
+          <button class="action-btn" id="btn-clear" type="button">
             <i class="fas fa-trash-alt"></i> Clear All
           </button>
         </div>
         <div class="action-row">
-          <button class="action-btn" id="btn-dark">
-            <i class="fas fa-moon"></i> Dark / Light
+          <button class="action-btn" id="btn-dark" type="button">
+            <i class="fas fa-moon"></i> Dark / Light UI
           </button>
-          <button class="action-btn" id="btn-save">
+          <button class="action-btn" id="btn-save" type="button">
             <i class="fas fa-save"></i> Save
           </button>
         </div>
 
-        <button class="print-btn" id="btn-print">
+        <button class="print-btn" id="btn-print" type="button">
           <i class="fas fa-print"></i> Print / Save as PDF
         </button>
         <p class="hint">
           Fill the fields on the left — the sheet on the right updates as you
-          type. Use <strong>Print / Save as PDF</strong> for a clean copy.
+          type. Each document type keeps its own colors so printed copies are
+          easy to tell apart at a glance.
           <br /><kbd>Ctrl+P</kbd> print · <kbd>Ctrl+S</kbd> save
         </p>
       </aside>
