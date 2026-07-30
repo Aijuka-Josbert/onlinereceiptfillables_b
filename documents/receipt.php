@@ -31,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$customer_id, $date, $amount, $amount_words, $payment_method, $balance, $description, $issued_by, $id]);
     } else {
         $doc_number = generateDocNumber('RC', $pdo);
-        $stmt = $pdo->prepare("INSERT INTO receipts (doc_number, customer_id, date, amount, amount_in_words, payment_method, balance, description, issued_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$doc_number, $customer_id, $date, $amount, $amount_words, $payment_method, $balance, $description, $issued_by]);
+        $stmt = $pdo->prepare("INSERT INTO receipts (doc_number, customer_id, date, amount, amount_in_words, payment_method, balance, description, issued_by, created_by_user_id, created_by_role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$doc_number, $customer_id, $date, $amount, $amount_words, $payment_method, $balance, $description, $issued_by, $_SESSION['user_id'], $_SESSION['role']]);
         $id = $pdo->lastInsertId();
     }
     header("Location: print.php?type=RC&id=$id");
@@ -40,9 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if (!$isEdit) {
-    $doc = ['customer_id' => 0, 'date' => date('Y-m-d'), 'amount' => 0, 'payment_method' => 'Cash', 'balance' => 0, 'description' => '', 'issued_by' => ''];
+    $doc = ['customer_id' => 0, 'date' => date('Y-m-d'), 'amount' => 0, 'payment_method' => 'Cash', 'balance' => 0, 'description' => '', 'issued_by' => $_SESSION['username'] ?? ''];
 }
-include '../includes/header.php';
+$pageTitle = $isEdit ? 'Edit Receipt' : 'New Receipt'; include '../includes/header.php';
 ?>
 
 <h2><?= $isEdit ? 'Edit' : 'New' ?> Receipt</h2>

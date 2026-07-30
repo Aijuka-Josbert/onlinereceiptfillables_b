@@ -67,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // New document number
         $doc_number = generateDocNumber('PF', $pdo);
-        $stmt = $pdo->prepare("INSERT INTO proforma_invoices (doc_number, customer_id, date, subtotal, vat, total, amount_in_words, payment_terms, contact_info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$doc_number, $customer_id, $date, $subtotal, $vat, $total, $amount_words, $payment_terms, $contact_info]);
+        $stmt = $pdo->prepare("INSERT INTO proforma_invoices (doc_number, customer_id, date, subtotal, vat, total, amount_in_words, payment_terms, contact_info, created_by_user_id, created_by_role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$doc_number, $customer_id, $date, $subtotal, $vat, $total, $amount_words, $payment_terms, $contact_info, $_SESSION['user_id'], $_SESSION['role']]);
         $id = $pdo->lastInsertId();
         foreach ($items_data as $item) {
             $stmt = $pdo->prepare("INSERT INTO proforma_items (proforma_id, description, quantity, unit_price, amount) VALUES (?, ?, ?, ?, ?)");
@@ -94,7 +94,7 @@ if (!$isEdit) {
 // Fetch company settings for preview
 $company = getCompany($pdo);
 
-include '../includes/header.php';
+$pageTitle = $isEdit ? 'Edit Proforma Invoice' : 'New Proforma Invoice'; include '../includes/header.php';
 ?>
 
 <h2><?= $isEdit ? 'Edit' : 'New' ?> Proforma Invoice</h2>
@@ -153,10 +153,18 @@ include '../includes/header.php';
 </form>
 
 <!-- Live preview -->
+<?php
+$pfTheme = docTheme($company, 'PF');
+$pfThemeStyle = sprintf(
+    '--doc-paper:%s;--doc-ink:%s;--doc-ink-soft:%s;--doc-stamp:%s;--doc-rule:%s;',
+    $pfTheme['paper'], $pfTheme['ink'], $pfTheme['inkSoft'], $pfTheme['accent'], $pfTheme['rule']
+);
+$companyLogo = companyLogoSrc($company);
+?>
 <div class="preview-container">
     <div>
         <h4>Preview</h4>
-        <div class="paper" id="previewPaper">
+        <div class="paper" id="previewPaper" style="<?= $pfThemeStyle ?>">
             <!-- Will be updated by JavaScript -->
         </div>
     </div>
@@ -227,22 +235,30 @@ function updatePreview() {
         items.push({});
     }
 
-    const companyName = '<?= addslashes($company['company_name'] ?? 'FITWELL MILLING SYSTEMS (U) LIMITED') ?>';
+    const companyName = '<?= addslashes($company['company_name'] ?? 'Your Company Name') ?>';
+    const companyTagline = '<?= addslashes($company['tagline'] ?? '') ?>';
+    const companyLogo = '<?= addslashes($companyLogo) ?>';
     const companyAddr = '<?= addslashes($company['address'] ?? '') ?>';
-    const companyPobox = '<?= addslashes($company['pobox'] ?? '9021, Kampala, Uganda') ?>';
+    const companyPobox = '<?= addslashes($company['pobox'] ?? '') ?>';
     const companyPhone = '<?= addslashes($company['phone'] ?? '') ?>';
     const companyEmail = '<?= addslashes($company['email'] ?? '') ?>';
+    const companyTin = '<?= addslashes($company['tin'] ?? '') ?>';
+    const companyReg = '<?= addslashes($company['registration_number'] ?? '') ?>';
+    const companyWeb = '<?= addslashes($company['website'] ?? '') ?>';
 
     preview.innerHTML = `
+        ${companyLogo ? `<img class="co-logo" src="${companyLogo}" alt="Company logo" />` : ''}
         <p class="co-name">${esc(companyName)}</p>
-        <p class="co-tag"><b>MILLING</b> SYSTEMS, SUPPLIES &amp; SERVICE</p>
-        <p class="co-sub">SPARES, EQUIPMENT &amp; ACCESSORIES</p>
+        ${companyTagline ? `<p class="co-tag">${esc(companyTagline)}</p>` : ''}
         <hr class="hr">
         <div class="addr-block">
             <p>${esc(companyAddr)}</p>
-            <p>P.O. Box: ${esc(companyPobox)}</p>
+            ${companyPobox ? `<p>P.O. Box: ${esc(companyPobox)}</p>` : ''}
             <p>Tel: ${esc(companyPhone)}</p>
             <p>Email: ${esc(companyEmail)}</p>
+            ${companyTin ? `<p>TIN: ${esc(companyTin)}</p>` : ''}
+            ${companyReg ? `<p>Reg. No.: ${esc(companyReg)}</p>` : ''}
+            ${companyWeb ? `<p>Web: ${esc(companyWeb)}</p>` : ''}
         </div>
         <div class="title-box"><span>PROFORMA INVOICE</span></div>
         <div class="meta-row">

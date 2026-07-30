@@ -68,21 +68,32 @@ if (isset($_GET['pdf']) && !$error) {
 }
 
 function renderDocument($doc, $items, $customer, $company, $type) {
+    $theme = docTheme($company, $type);
+    $paperStyle = sprintf(
+        '--doc-paper:%s;--doc-ink:%s;--doc-ink-soft:%s;--doc-stamp:%s;--doc-rule:%s;',
+        $theme['paper'], $theme['ink'], $theme['inkSoft'], $theme['accent'], $theme['rule']
+    );
+    $logo = companyLogoSrc($company);
+    $titleLabel = ['DN' => 'Delivery Note', 'RC' => 'Receipt', 'PF' => 'Proforma Invoice'][$type] ?? 'Document';
+
     ob_start();
     ?>
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title><?= $doc['doc_number'] ?></title>
+        <title><?= esc($doc['doc_number']) ?> — <?= esc($titleLabel) ?></title>
+        <meta name="robots" content="noindex, nofollow">
         <link rel="stylesheet" href="../assets/css/style.css">
         <style>
-            /* Print‑only styles – keep the cream paper and colors */
-            body { background: #fff; padding: 20px; margin: 0; }
-            .paper { max-width: 800px; margin: 0 auto; background: var(--paper) !important; padding: 30px; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); color: var(--ink) !important; }
+            /* Print‑preview‑only styles — the actual document colors come
+               from the inline --doc-* variables set on .paper below, so
+               each document type keeps its own look. */
+            body { background: #fff; padding: 20px; margin: 0; font-family: 'Inter', sans-serif; }
+            .paper { max-width: 800px; margin: 0 auto; padding: 30px; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
             .print-actions { text-align: center; margin-bottom: 20px; }
             .print-actions button { padding: 10px 24px; background: var(--accent); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 0 6px; }
-            .print-actions button:hover { background: #A0783E; }
+            .print-actions button:hover { filter: brightness(1.08); }
             @media print {
                 .print-actions { display: none; }
                 body { padding: 0; background: #fff; }
@@ -96,23 +107,22 @@ function renderDocument($doc, $items, $customer, $company, $type) {
             <button onclick="window.location.href='print.php?type=<?= $type ?>&id=<?= $doc['id'] ?>&pdf=1'"><i class="fas fa-file-pdf"></i> Download PDF</button>
             <button onclick="window.close()">Close</button>
         </div>
-        <div class="paper">
+        <div class="paper" style="<?= $paperStyle ?>">
             <!-- Letterhead -->
-            <p class="co-name"><?= esc($company['company_name']) ?></p>
-            <?php if ($company['logo']): ?>
-                <img src="<?= esc($company['logo']) ?>" style="display:block;margin:0 auto 8px;max-height:60px;" />
+            <?php if ($logo): ?>
+                <img class="co-logo" src="<?= esc($logo) ?>" alt="<?= esc($company['company_name']) ?> logo" style="display:block;margin:0 auto 10px;max-height:64px;max-width:220px;object-fit:contain;" />
             <?php endif; ?>
-            <p class="co-tag"><b>MILLING</b> SYSTEMS, SUPPLIES &amp; SERVICE</p>
-            <p class="co-sub">SPARES, EQUIPMENT &amp; ACCESSORIES</p>
+            <p class="co-name"><?= esc($company['company_name']) ?></p>
+            <?php if (!empty($company['tagline'])): ?><p class="co-tag"><?= esc($company['tagline']) ?></p><?php endif; ?>
             <hr class="hr">
             <div class="addr-block">
-                <p><?= nl2br(esc($company['address'])) ?></p>
-                <p>P.O. Box: <?= esc($company['pobox'] ?? '') ?></p>
-                <p>Tel: <?= esc($company['phone']) ?></p>
-                <p>Email: <?= esc($company['email']) ?></p>
-                <?php if ($company['tin']): ?><p>TIN: <?= esc($company['tin']) ?></p><?php endif; ?>
-                <?php if ($company['registration_number']): ?><p>Reg. No.: <?= esc($company['registration_number']) ?></p><?php endif; ?>
-                <?php if ($company['website']): ?><p>Web: <?= esc($company['website']) ?></p><?php endif; ?>
+                <?php if (!empty($company['address'])): ?><p><?= nl2br(esc($company['address'])) ?></p><?php endif; ?>
+                <?php if (!empty($company['pobox'])): ?><p>P.O. Box: <?= esc($company['pobox']) ?></p><?php endif; ?>
+                <?php if (!empty($company['phone'])): ?><p>Tel: <?= esc($company['phone']) ?></p><?php endif; ?>
+                <?php if (!empty($company['email'])): ?><p>Email: <?= esc($company['email']) ?></p><?php endif; ?>
+                <?php if (!empty($company['tin'])): ?><p>TIN: <?= esc($company['tin']) ?></p><?php endif; ?>
+                <?php if (!empty($company['registration_number'])): ?><p>Reg. No.: <?= esc($company['registration_number']) ?></p><?php endif; ?>
+                <?php if (!empty($company['website'])): ?><p>Web: <?= esc($company['website']) ?></p><?php endif; ?>
             </div>
 
             <?php if ($type === 'DN'): ?>
@@ -193,6 +203,7 @@ function renderDocument($doc, $items, $customer, $company, $type) {
 
 // If error, show message with return link
 if ($error) {
+    $pageTitle = 'Document not found';
     include '../includes/header.php';
     echo '<div class="alert alert-warning">' . esc($error) . ' <a href="' . BASE_URL . 'dashboard.php" class="alert-link">Go to Dashboard</a></div>';
     include '../includes/footer.php';
@@ -201,4 +212,3 @@ if ($error) {
 
 // Otherwise render the document
 echo renderDocument($doc, $items, $customer, $company, $type);
-?>

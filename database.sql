@@ -14,18 +14,31 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Settings (company info) – now with pobox
+-- Settings (company info) – now with pobox, tagline, uploaded logo and
+-- per-document brand colors so Delivery Notes / Receipts / Proforma
+-- Invoices can each look visually distinct.
 CREATE TABLE settings (
     id INT PRIMARY KEY DEFAULT 1,
-    company_name VARCHAR(100) NOT NULL DEFAULT 'FITWELL MILLING SYSTEMS (U) LIMITED',
-    logo VARCHAR(255) DEFAULT NULL,
+    company_name VARCHAR(100) NOT NULL DEFAULT 'Your Company Name',
+    tagline VARCHAR(150) DEFAULT NULL,
+    logo VARCHAR(255) DEFAULT NULL,          -- logo image link (used if no upload)
+    logo_data LONGTEXT DEFAULT NULL,          -- uploaded logo, stored as a base64 data URI (takes priority over `logo`)
     address TEXT,
-    pobox VARCHAR(50) DEFAULT '9021, Kampala, Uganda',
+    pobox VARCHAR(50) DEFAULT NULL,
     phone VARCHAR(50),
     email VARCHAR(100),
     website VARCHAR(100),
     tin VARCHAR(50),
     registration_number VARCHAR(50),
+    dn_paper VARCHAR(7) DEFAULT '#EEF3F7',
+    dn_ink VARCHAR(7) DEFAULT '#1B2733',
+    dn_accent VARCHAR(7) DEFAULT '#2F6690',
+    rc_paper VARCHAR(7) DEFAULT '#F2F6EE',
+    rc_ink VARCHAR(7) DEFAULT '#1E2A1A',
+    rc_accent VARCHAR(7) DEFAULT '#2F6B4F',
+    pf_paper VARCHAR(7) DEFAULT '#FBF3E2',
+    pf_ink VARCHAR(7) DEFAULT '#2A2013',
+    pf_accent VARCHAR(7) DEFAULT '#A5461F',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -63,9 +76,12 @@ CREATE TABLE delivery_notes (
     amount_in_words TEXT,
     delivered_by VARCHAR(100),
     received_by VARCHAR(100),
+    created_by_user_id INT DEFAULT NULL,
+    created_by_role VARCHAR(10) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE RESTRICT
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 CREATE INDEX idx_dn_customer ON delivery_notes(customer_id);
 CREATE INDEX idx_dn_number ON delivery_notes(doc_number);
@@ -96,9 +112,12 @@ CREATE TABLE receipts (
     balance DECIMAL(15,2) DEFAULT 0.00,
     description TEXT,
     issued_by VARCHAR(100),
+    created_by_user_id INT DEFAULT NULL,
+    created_by_role VARCHAR(10) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE RESTRICT
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 CREATE INDEX idx_rc_customer ON receipts(customer_id);
 CREATE INDEX idx_rc_number ON receipts(doc_number);
@@ -115,9 +134,12 @@ CREATE TABLE proforma_invoices (
     amount_in_words TEXT,
     payment_terms VARCHAR(100),
     contact_info VARCHAR(100),
+    created_by_user_id INT DEFAULT NULL,
+    created_by_role VARCHAR(10) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE RESTRICT
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 CREATE INDEX idx_pf_customer ON proforma_invoices(customer_id);
 CREATE INDEX idx_pf_number ON proforma_invoices(doc_number);
@@ -137,22 +159,18 @@ CREATE TABLE proforma_items (
 CREATE INDEX idx_pi_proforma ON proforma_items(proforma_id);
 
 -- ------------------------------------------------------------
--- Insert default admin user (password: admin123)
--- Hash: $2y$10$V2D5/XLq1JvwP5xvLhK4y.w6hPvJ5t1U8vJ6Y.hYq.QJ6Lq5M4A
+-- Insert default admin + staff users
+-- IMPORTANT: change these passwords immediately after first login.
+--   admin / admin123   (role: admin)
+--   staff / staff123   (role: staff)
 -- ------------------------------------------------------------
-INSERT INTO users (username, password_hash, role) VALUES 
-('admin', '$2y$10$V2D5/XLq1JvwP5xvLhK4y.w6hPvJ5t1U8vJ6Y.hYq.QJ6Lq5M4A', 'admin');
+INSERT INTO users (username, password_hash, role) VALUES
+('admin', '$2b$10$L46EB.y7Vrml90uXgFAVqO6WnKOjCeYYotB7uPwu5ZHik7NTue5om', 'admin'),
+('staff', '$2a$10$7rqAsd0JGtdmnHvXwU359OrtR8ggQ3quF5o30OHZD2bUmlKcU2Mae', 'staff');
 
--- Insert default company settings
-INSERT INTO settings (id, company_name, address, pobox, phone, email, website, tin, registration_number)
-VALUES (1, 'FITWELL MILLING SYSTEMS (U) LIMITED', 
-        'Plot 14, Kifumbira Rd, Ntinda, Kampala', 
-        '9021, Kampala, Uganda',
-        '+256 701 220345', 
-        'info@fitwellmilling.co.ug', 
-        'www.fitwellmilling.co.ug', 
-        '1012345678', 
-        '80020001234567');
-
-        INSERT INTO users (username, password_hash, role) VALUES 
-('staff', '$2y$10$V2D5/XLq1JvwP5xvLhK4y.w6hPvJ5t1U8vJ6Y.hYq.QJ6Lq5M4A', 'staff');
+-- Insert default company settings (generic placeholder — edit in Settings
+-- after first login; per-document colors default to the built-in palette
+-- via the column defaults above).
+INSERT INTO settings (id, company_name, tagline, address, pobox, phone, email, website, tin, registration_number)
+VALUES (1, 'Beyond code', 'YOur software solution',
+        '', '', '', '', '', '', '');

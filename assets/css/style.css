@@ -1,12 +1,21 @@
-/* ===== CSS Variables (Light / Dark) ===== */
+/* ===== CSS Variables ======================================
+   Two independent theming layers:
+   1. --chrome-*  → the app UI (navbar/sidebar), toggled light/dark
+   2. --doc-*     → the printed document itself. Delivery Note,
+                    Receipt and Proforma Invoice each carry their
+                    own paper/ink/accent, set inline per document
+                    (see documents/print.php and settings.php) so
+                    they stay visually distinct from one another
+                    regardless of the UI's light/dark mode.
+   ============================================================ */
 :root {
-  --paper: #f8f3e9;
+  --doc-paper: #f8f3e9;
+  --doc-ink: #1e1b16;
+  --doc-ink-soft: #4a443a;
+  --doc-stamp: #a53f2f;
+  --doc-rule: #b7ac93;
   --paper-shadow-1: #e6dbc8;
   --paper-shadow-2: #d0cdbb;
-  --ink: #1e1b16;
-  --ink-soft: #4a443a;
-  --stamp: #a53f2f;
-  --rule: #b7ac93;
   --chrome-bg: #f0ede7;
   --chrome-panel: #ffffff;
   --chrome-line: #dcd7cf;
@@ -18,13 +27,8 @@
   --radius: 8px;
 }
 body.dark {
-  --paper: #1e1b16;
   --paper-shadow-1: #0f0e0a;
   --paper-shadow-2: #1a1812;
-  --ink: #edeae0;
-  --ink-soft: #b8b0a0;
-  --stamp: #d97a6a;
-  --rule: #5a4f3e;
   --chrome-bg: #1a1816;
   --chrome-panel: #26231e;
   --chrome-line: #3a3530;
@@ -360,8 +364,8 @@ legend i {
 .paper {
   position: relative;
   z-index: 1;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--doc-paper);
+  color: var(--doc-ink);
   padding: 40px 44px 48px;
   font-family: "Courier Prime", monospace;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
@@ -388,23 +392,33 @@ legend i {
 .co-tag b {
   font-weight: 700;
 }
+.co-tag {
+  color: var(--doc-ink-soft);
+}
 .co-sub {
   text-align: center;
   font-size: 11px;
-  color: var(--ink-soft);
+  color: var(--doc-ink-soft);
   margin: 0 0 14px;
 }
 .hr {
   border: none;
-  border-top: 1.5px solid var(--ink);
+  border-top: 1.5px solid var(--doc-ink);
   margin: 0 0 14px;
+}
+.co-logo {
+  display: block;
+  max-height: 64px;
+  max-width: 220px;
+  margin: 0 auto 10px;
+  object-fit: contain;
 }
 .addr-block p {
   margin: 0 0 2px;
   font-size: 11.5px;
 }
 .title-box {
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--doc-ink);
   text-align: center;
   padding: 8px 0;
   margin: 16px 0 14px;
@@ -413,7 +427,7 @@ legend i {
   font-family: "Arvo", serif;
   font-weight: 700;
   font-size: 19px;
-  color: var(--stamp);
+  color: var(--doc-stamp);
   letter-spacing: 0.08em;
 }
 .meta-row {
@@ -438,13 +452,13 @@ table.doc-table {
 }
 table.doc-table th,
 table.doc-table td {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--doc-ink);
   padding: 6px 8px;
   font-size: 11.5px;
   vertical-align: top;
 }
 table.doc-table th {
-  background: var(--rule);
+  background: var(--doc-rule);
   text-align: center;
   font-size: 10.5px;
   text-transform: uppercase;
@@ -466,7 +480,7 @@ table.doc-table td.right {
 }
 .fill-line .under {
   flex: 1;
-  border-bottom: 1px dotted var(--ink-soft);
+  border-bottom: 1px dotted var(--doc-ink-soft);
   min-height: 16px;
 }
 .sig-grid {
@@ -477,7 +491,7 @@ table.doc-table td.right {
   font-size: 12px;
 }
 .sig-line {
-  border-top: 1px solid var(--ink);
+  border-top: 1px solid var(--doc-ink);
   margin-top: 26px;
   padding-top: 4px;
 }
@@ -485,7 +499,7 @@ table.doc-table td.right {
   text-align: center;
   font-size: 10.5px;
   font-style: italic;
-  color: var(--ink-soft);
+  color: var(--doc-ink-soft);
   margin-top: 18px;
 }
 /* ===== Responsive ===== */
@@ -526,10 +540,10 @@ table.doc-table td.right {
   }
 }
 
-/* ===== PRINT STYLES – HIGH CONTRAST FOR READABILITY ===== */
+/* ===== PRINT STYLES ===== */
 @media print {
-  /* Hide sidebar and controls */
-  .sidebar {
+  .sidebar,
+  .no-print {
     display: none !important;
   }
   .stage {
@@ -545,56 +559,223 @@ table.doc-table td.right {
     display: none !important;
   }
 
-  /* Document paper – pure white background + black text for maximum contrast */
+  /* Preserve each document's own paper/ink/accent so a Delivery Note,
+     Receipt, and Proforma Invoice stay easy to tell apart even on a
+     printed page or exported PDF. */
   .paper {
     box-shadow: none !important;
     padding: 20px 24px !important;
     min-height: 0 !important;
-    background: #ffffff !important;
-    color: #000000 !important;
+    background: var(--doc-paper) !important;
+    color: var(--doc-ink) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-
-  /* Force all text to black */
   .paper * {
-    color: #000000 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-
-  /* Keep the title box and stamp red for visual distinction, but ensure it's readable */
-  .paper .title-box span {
-    color: #a53f2f !important;
+  .title-box span {
+    color: var(--doc-stamp) !important;
   }
-  .paper .co-name {
-    color: #000000 !important;
-  }
-
-  /* Table headers – dark gray for contrast */
   table.doc-table th {
-    background: #d0d0d0 !important;
-    color: #000000 !important;
+    background: var(--doc-rule) !important;
   }
-
-  /* Table borders – darker for clarity */
   table.doc-table th,
   table.doc-table td {
-    border: 1.5px solid #333333 !important;
+    border: 1.3px solid var(--doc-ink) !important;
   }
-
-  /* Underlines and signature lines – solid black */
   .fill-line .under {
-    border-bottom: 1.5px solid #000000 !important;
+    border-bottom: 1.3px solid var(--doc-ink-soft) !important;
   }
   .sig-line {
-    border-top: 1.5px solid #000000 !important;
+    border-top: 1.3px solid var(--doc-ink) !important;
   }
   .hr {
-    border-top: 2px solid #000000 !important;
+    border-top: 1.8px solid var(--doc-ink) !important;
   }
+}
 
-  .paper-footer {
-    color: #333333 !important;
+/* ===== Logo upload (Settings page) ===== */
+.logo-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.upload-btn:hover {
+  filter: brightness(1.08);
+}
+.upload-btn.ghost {
+  background: transparent;
+  color: var(--chrome-muted);
+  border: 1px solid var(--chrome-line);
+}
+.upload-btn.ghost:hover {
+  color: var(--chrome-text);
+  border-color: var(--chrome-muted);
+}
+.logo-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--chrome-muted);
+}
+.logo-preview-row img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  background: var(--input-bg);
+  border: 1px solid var(--chrome-line);
+  border-radius: 6px;
+  padding: 4px;
+}
+
+/* ===== Per-document color picker (Settings page) ===== */
+.theme-card {
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--input-bg);
+  margin-bottom: 16px;
+}
+.theme-card h5 {
+  font-size: 13px;
+  margin-bottom: 12px;
+  color: var(--chrome-text);
+}
+.swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--chrome-panel);
+  outline: 1px solid var(--chrome-line);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s;
+}
+.swatch:hover {
+  transform: scale(1.12);
+}
+.swatch.active {
+  outline: 2px solid var(--chrome-text);
+  outline-offset: 1px;
+}
+.color-pick-row {
+  display: flex;
+  gap: 10px;
+}
+.color-pick {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.color-pick span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--chrome-muted);
+}
+.color-pick input[type="color"] {
+  width: 100%;
+  height: 32px;
+  padding: 2px;
+  cursor: pointer;
+  border: 1px solid var(--chrome-line);
+  border-radius: 6px;
+  background: var(--chrome-panel);
+}
+
+/* ===== Document-creation form pages (delivery-note / receipt / proforma) ===== */
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.form-row label {
+  flex: 1;
+  min-width: 200px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--chrome-text);
+  font-weight: 500;
+}
+.form-row label input,
+.form-row label select,
+.form-row label textarea {
+  margin-top: 4px;
+}
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  background: var(--chrome-panel);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.items-table th,
+.items-table td {
+  border-bottom: 1px solid var(--chrome-line);
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 13px;
+}
+.items-table th {
+  background: var(--chrome-line);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.items-table input {
+  font-size: 13px;
+  padding: 6px 8px;
+}
+.preview-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 30px;
+}
+.preview-container h4 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--chrome-muted);
+  margin-bottom: 10px;
+}
+.preview-container .paper {
+  min-height: 0;
+  font-size: 11px;
+  padding: 24px 26px;
+}
+@media (max-width: 900px) {
+  .preview-container {
+    grid-template-columns: 1fr;
   }
 }

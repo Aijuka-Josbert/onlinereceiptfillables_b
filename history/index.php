@@ -43,14 +43,17 @@ if ($type) {
 
 // Build the subquery with customer names
 $subquery = "
-    SELECT 'DN' as type, doc_number, date, customer_id, total as amount FROM delivery_notes
+    SELECT 'DN' as type, doc_number, date, customer_id, total as amount, created_by_user_id FROM delivery_notes
     UNION ALL
-    SELECT 'RC' as type, doc_number, date, customer_id, amount FROM receipts
+    SELECT 'RC' as type, doc_number, date, customer_id, amount, created_by_user_id FROM receipts
     UNION ALL
-    SELECT 'PF' as type, doc_number, date, customer_id, total FROM proforma_invoices
+    SELECT 'PF' as type, doc_number, date, customer_id, total, created_by_user_id FROM proforma_invoices
 ";
 // Wrap in subquery to filter and paginate
-$sql = "SELECT *, (SELECT name FROM customers WHERE id = customer_id) as customer_name FROM ($subquery) AS docs";
+$sql = "SELECT *, (SELECT name FROM customers WHERE id = customer_id) as customer_name,
+        (SELECT username FROM users WHERE id = created_by_user_id) as created_by_username,
+        (SELECT role FROM users WHERE id = created_by_user_id) as created_by_role
+        FROM ($subquery) AS docs";
 if (!empty($where)) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
@@ -72,7 +75,7 @@ $countStmt->execute(array_slice($params, 0, -2)); // remove limit & offset
 $total = $countStmt->fetchColumn();
 $totalPages = ceil($total / $limit);
 
-include '../includes/header.php';
+$pageTitle = 'History'; include '../includes/header.php';
 ?>
 <h2>Document History</h2>
 
@@ -107,7 +110,7 @@ include '../includes/header.php';
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
-            <tr><th>Type</th><th>Number</th><th>Date</th><th>Customer</th><th>Total</th></tr>
+            <tr><th>Type</th><th>Number</th><th>Date</th><th>Customer</th><th>Amount</th><th>Created By</th></tr>
         </thead>
         <tbody>
             <?php foreach ($docs as $d): ?>
@@ -117,10 +120,18 @@ include '../includes/header.php';
                 <td><?= $d['date'] ?></td>
                 <td><?= esc($d['customer_name'] ?? 'Unknown') ?></td>
                 <td><?= number_format($d['amount'], 2) ?></td>
+                <td>
+                    <?php if (!empty($d['created_by_username'])): ?>
+                        <?= esc($d['created_by_username']) ?>
+                        <span class="badge <?= $d['created_by_role'] === 'admin' ? 'bg-primary' : 'bg-secondary' ?>"><?= esc(ucfirst($d['created_by_role'])) ?></span>
+                    <?php else: ?>
+                        <span class="text-muted">—</span>
+                    <?php endif; ?>
+                </td>
             </tr>
             <?php endforeach; ?>
             <?php if (empty($docs)): ?>
-            <tr><td colspan="5" class="text-center text-muted">No documents found.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted">No documents found.</td></tr>
             <?php endif; ?>
         </tbody>
     </table>

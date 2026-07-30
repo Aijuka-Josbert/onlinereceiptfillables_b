@@ -1,9 +1,22 @@
+<?php
+// Company name/logo are pulled from Settings so this shell isn't tied to
+// any one business. $pdo is available here because every page includes
+// includes/db.php before including this file.
+$__company = (isset($pdo) && function_exists('getCompany')) ? getCompany($pdo) : null;
+$__companyName = $__company['company_name'] ?? 'Document Manager';
+$__companyLogo = (isset($__company) && function_exists('companyLogoSrc')) ? companyLogoSrc($__company) : '';
+$pageTitle = isset($pageTitle) ? $pageTitle . ' — ' . $__companyName : $__companyName . ' — Document Management System';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitwell DMS</title>
+    <title><?= esc($pageTitle) ?></title>
+    <!-- This is a private, login‑gated business tool — keep it out of search engines -->
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#2F6690">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%232F6690'/%3E%3Cpath d='M28 22h44a4 4 0 0 1 4 4v56l-9-6-9 6-9-6-9 6-9-6-9 6V26a4 4 0 0 1 4-4z' fill='%23fff'/%3E%3Cpath d='M36 38h28M36 48h28M36 58h18' stroke='%232F6690' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -47,7 +60,10 @@
 
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-        <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php"><strong>Fitwell</strong> Milling Systems</a>
+        <a class="navbar-brand" href="<?= BASE_URL ?>dashboard.php">
+            <?php if ($__companyLogo): ?><img src="<?= esc($__companyLogo) ?>" alt="" style="height:26px;width:auto;vertical-align:middle;margin-right:8px;border-radius:4px;"><?php endif; ?>
+            <?= esc($__companyName) ?>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>

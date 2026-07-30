@@ -1,6 +1,11 @@
 <?php
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
+require_once 'includes/functions.php';
+
+$company = getCompany($pdo);
+$companyName = $company['company_name'] ?? 'Document Manager';
+$companyLogo = companyLogoSrc($company);
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,7 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login – Fitwell Milling Systems</title>
+    <title>Login – <?= htmlspecialchars($companyName) ?></title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#2F6690">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%232F6690'/%3E%3Cpath d='M28 22h44a4 4 0 0 1 4 4v56l-9-6-9 6-9-6-9 6-9-6-9 6V26a4 4 0 0 1 4-4z' fill='%23fff'/%3E%3Cpath d='M36 38h28M36 48h28M36 58h18' stroke='%232F6690' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Arvo:wght@700&family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -116,7 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="login-card">
-    <div class="brand"><strong>Fitwell</strong> Milling Systems</div>
+    <?php if ($companyLogo): ?><img src="<?= htmlspecialchars($companyLogo) ?>" alt="" style="max-height:48px;max-width:200px;margin-bottom:12px;object-fit:contain;"><?php endif; ?>
+    <div class="brand"><?= htmlspecialchars($companyName) ?></div>
     <div class="sub">Document Management System</div>
     <form method="post">
         <input type="text" name="username" placeholder="Username" required autofocus>
@@ -126,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="error"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
     </form>
-    <div class="hint">Default: <kbd>admin</kbd> / <kbd>admin123</kbd></div>
 </div>
 </body>
 </html>

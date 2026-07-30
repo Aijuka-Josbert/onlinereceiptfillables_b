@@ -67,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // New document number
         $doc_number = generateDocNumber('DN', $pdo);
-        $stmt = $pdo->prepare("INSERT INTO delivery_notes (doc_number, customer_id, date, subtotal, vat, total, amount_in_words, delivered_by, received_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$doc_number, $customer_id, $date, $subtotal, $vat, $total, $amount_words, $delivered_by, $received_by]);
+        $stmt = $pdo->prepare("INSERT INTO delivery_notes (doc_number, customer_id, date, subtotal, vat, total, amount_in_words, delivered_by, received_by, created_by_user_id, created_by_role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$doc_number, $customer_id, $date, $subtotal, $vat, $total, $amount_words, $delivered_by, $received_by, $_SESSION['user_id'], $_SESSION['role']]);
         $id = $pdo->lastInsertId();
         foreach ($items_data as $item) {
             $stmt = $pdo->prepare("INSERT INTO delivery_note_items (delivery_note_id, description, quantity, unit_price, amount) VALUES (?, ?, ?, ?, ?)");
@@ -82,10 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // For initial load, if not edit, set default date and empty items
 if (!$isEdit) {
-    $doc = ['customer_id' => 0, 'date' => date('Y-m-d'), 'delivered_by' => '', 'received_by' => ''];
+    $doc = ['customer_id' => 0, 'date' => date('Y-m-d'), 'delivered_by' => $_SESSION['username'] ?? '', 'received_by' => ''];
     $items = [['description' => '', 'quantity' => 1, 'unit_price' => 0, 'amount' => 0]];
 }
-include '../includes/header.php';
+$pageTitle = $isEdit ? 'Edit Delivery Note' : 'New Delivery Note'; include '../includes/header.php';
 ?>
 
 <h2><?= $isEdit ? 'Edit' : 'New' ?> Delivery Note</h2>
@@ -139,10 +139,19 @@ include '../includes/header.php';
 </form>
 
 <!-- Live preview -->
+<?php
+$company = getCompany($pdo);
+$dnTheme = docTheme($company, 'DN');
+$dnThemeStyle = sprintf(
+    '--doc-paper:%s;--doc-ink:%s;--doc-ink-soft:%s;--doc-stamp:%s;--doc-rule:%s;',
+    $dnTheme['paper'], $dnTheme['ink'], $dnTheme['inkSoft'], $dnTheme['accent'], $dnTheme['rule']
+);
+$companyLogo = companyLogoSrc($company);
+?>
 <div class="preview-container">
     <div>
         <h4>Preview</h4>
-        <div class="paper" id="previewPaper">
+        <div class="paper" id="previewPaper" style="<?= $dnThemeStyle ?>">
             <!-- Will be updated by JavaScript -->
         </div>
     </div>
@@ -150,7 +159,6 @@ include '../includes/header.php';
         <h4>Company Letterhead (from settings)</h4>
         <div class="paper" id="letterheadPreview">
             <?php
-            $company = getCompany($pdo);
             echo "<p><strong>" . esc($company['company_name']) . "</strong></p>";
             echo "<p>" . nl2br(esc($company['address'])) . "</p>";
             echo "<p>Phone: " . esc($company['phone']) . "</p>";
@@ -216,15 +224,22 @@ function updatePreview() {
     }
 
     preview.innerHTML = `
-        <p class="co-name">${esc('<?= addslashes($company['company_name'] ?? 'FITWELL MILLING SYSTEMS (U) LIMITED') ?>')}</p>
-        <p class="co-tag"><b>MILLING</b> SYSTEMS, SUPPLIES &amp; SERVICE</p>
-        <p class="co-sub">SPARES, EQUIPMENT &amp; ACCESSORIES</p>
+        <?php if ($companyLogo): ?>
+        <img class="co-logo" src="<?= esc($companyLogo) ?>" alt="Company logo" />
+        <?php endif; ?>
+        <p class="co-name">${esc('<?= addslashes($company['company_name'] ?? 'Your Company Name') ?>')}</p>
+        <?php if (!empty($company['tagline'])): ?>
+        <p class="co-tag"><?= esc($company['tagline']) ?></p>
+        <?php endif; ?>
         <hr class="hr">
         <div class="addr-block">
             <p>${esc('<?= addslashes($company['address'] ?? '') ?>')}</p>
-            <p>P.O. Box: ${esc('<?= addslashes($company['pobox'] ?? '9021, Kampala, Uganda') ?>')}</p>
+            <?php if (!empty($company['pobox'])): ?><p>P.O. Box: ${esc('<?= addslashes($company['pobox']) ?>')}</p><?php endif; ?>
             <p>Tel: ${esc('<?= addslashes($company['phone'] ?? '') ?>')}</p>
             <p>Email: ${esc('<?= addslashes($company['email'] ?? '') ?>')}</p>
+            <?php if (!empty($company['tin'])): ?><p>TIN: <?= esc($company['tin']) ?></p><?php endif; ?>
+            <?php if (!empty($company['registration_number'])): ?><p>Reg. No.: <?= esc($company['registration_number']) ?></p><?php endif; ?>
+            <?php if (!empty($company['website'])): ?><p>Web: <?= esc($company['website']) ?></p><?php endif; ?>
         </div>
         <div class="title-box"><span>DELIVERY NOTE</span></div>
         <div class="meta-row">
