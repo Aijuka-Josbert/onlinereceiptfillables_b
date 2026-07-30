@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aijuka-josbert.github.io/onlinereceiptfillables_b/sitemap.xml
+Sitemap:https://onlinedocumentfillment.fwh.is/sitemap.xml
