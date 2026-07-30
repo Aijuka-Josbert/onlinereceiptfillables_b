@@ -731,3 +731,36 @@ table.doc-table td.right {
     border-top: 1.8px solid var(--doc-ink) !important;
   }
 }
+/* ===== Footer Credit ===== */
+.footer-credit {
+    font-family: 'Inter', sans-serif;
+    transition: color 0.2s;
+}
+.footer-credit h5 {
+    font-size: 12px;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+.footer-credit h5 span {
+    color: #e25555;
+    display: inline-block;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+.footer-credit p {
+    margin: 4px 0 0 0;
+    font-size: 10px;
+}
+.footer-credit a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.footer-credit a:hover {
+    text-decoration: underline;
+    color: var(--chrome-text);
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
